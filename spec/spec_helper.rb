@@ -1,0 +1,6 @@
+require_relative '../lib/json_object'
+require 'minitest/autorun'
+require 'minitest/spec'
+require 'json'
+require 'pry'
+require 'byebug'
