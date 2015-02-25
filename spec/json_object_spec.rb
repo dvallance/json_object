@@ -66,10 +66,20 @@ describe JsonObject do
         subject.new(json).an_array.must_equal [1,2,3]
       end
 
-      it "we can assign a specific accessor name for an attribute" do
-        subject.json_value_accessor :an_integer, name: "new_integer_accessor"
-        subject.new(json).methods.must_include :new_integer_accessor
-        subject.new(json).new_integer_accessor.must_equal 1
+      describe "assigning a specific accessor name" do
+        it "to one attribute" do
+          subject.json_value_accessor :an_integer, name: "new_integer_accessor"
+          subject.new(json).methods.must_include :new_integer_accessor
+          subject.new(json).new_integer_accessor.must_equal 1
+        end
+
+        it "with an existing accessor of the same name and a proc" do
+          subject.json_value_accessor :an_integer
+          subject.json_value_accessor :an_integer, name: "new_integer_accessor", proc: Proc.new {|obj, value| value * 2 }
+          subject.new(json).methods.must_include :new_integer_accessor
+          subject.new(json).an_integer.must_equal 1
+          subject.new(json).new_integer_accessor.must_equal 2
+        end
       end
 
       it "when a value doesn't exist nil will be found" do
@@ -173,6 +183,15 @@ describe JsonObject do
         result = subject.new(json)
         result.an_object.json_parent.must_equal result
       end
+    end
+
+    describe "an object handler given a nil (non-existing json object)" do
+
+      it "simply returns nil" do
+        subject.json_object_accessor :dosent_exist, class: object_handler_class
+        subject.new(json).dosent_exist.must_be_nil
+      end
+
     end
 
     describe "with arrays" do

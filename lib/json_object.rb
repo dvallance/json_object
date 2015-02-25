@@ -76,7 +76,7 @@ module JsonObject
             classes << klass.new(hash, obj)
           end
         else
-          klass.new(value_for_attribute, obj)
+          value_for_attribute.nil? ? nil : klass.new(value_for_attribute, obj)
         end
       end
     end
