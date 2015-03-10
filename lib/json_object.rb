@@ -5,11 +5,13 @@ require 'ostruct'
 module JsonObject
 
   class JsonOpenStruct < OpenStruct
-    attr_accessor :json_parent
+    include JsonObject
 
-    def initialize hash, parent=nil
-      @json_parent = parent
-      super(hash)
+    def self.init_from_json_hash hash, parent=nil
+      obj = new(hash)
+      obj.json_parent = parent
+      obj.json_hash = hash
+      obj
     end
   end
 
@@ -30,7 +32,8 @@ module JsonObject
     klass.extend ClassMethods
   end
 
-  #lets keep the name unique enough that it won't conflict
+  attr_accessor :json_parent
+
   attr_reader :json_hash
 
   def json_hash= hash
@@ -73,10 +76,10 @@ module JsonObject
         value_for_attribute = obj.json_hash[attribute.to_s]
         methods_value = if value_for_attribute.is_a? Array
           value_for_attribute.inject([]) do |classes, hash|
-            classes << klass.new(hash, obj)
+            classes << klass.init_from_json_hash(hash, obj)
           end
         else
-          value_for_attribute.nil? ? nil : klass.new(value_for_attribute, obj)
+          value_for_attribute.nil? ? nil : klass.init_from_json_hash(value_for_attribute, obj)
         end
       end
     end
@@ -85,11 +88,17 @@ module JsonObject
   class Base
     include JsonObject
 
-    attr_reader :json_parent
-
+    def self.init_from_json_hash hash, parent=nil
+      obj = new()
+      obj.json_parent = parent
+      obj.json_hash = hash
+      obj
+    end
+=begin
     def initialize hash, parent=nil
       self.json_hash = hash
       @json_parent = parent
     end
+=end
   end
 end
