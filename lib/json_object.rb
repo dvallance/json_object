@@ -31,10 +31,10 @@ module JsonObject
   end
 
   #lets keep the name unique enough that it won't conflict
-  attr_reader :json_object_hash
+  attr_reader :json_hash
 
-  def json_object_hash= hash
-   @json_object_hash = hash || {}
+  def json_hash= hash
+   @json_hash = hash || {}
   end
 
   module ClassMethods
@@ -56,7 +56,7 @@ module JsonObject
       default_value = opts[:default] || nil
       proc_provided = opts[:proc] || nil
       create_value_accessor_method attribute, opts do |obj|
-        value = obj.json_object_hash[attribute.to_s] || default_value
+        value = obj.json_hash[attribute.to_s] || default_value
         proc_provided ? proc_provided.call(obj, value) : value
       end
     end
@@ -70,7 +70,7 @@ module JsonObject
     def json_object_accessor attribute, opts={}
       klass = opts.fetch(:class, JsonObject.default_json_object_class)
       create_value_accessor_method attribute, opts do |obj|
-        value_for_attribute = obj.json_object_hash[attribute.to_s]
+        value_for_attribute = obj.json_hash[attribute.to_s]
         methods_value = if value_for_attribute.is_a? Array
           value_for_attribute.inject([]) do |classes, hash|
             classes << klass.new(hash, obj)
@@ -88,7 +88,7 @@ module JsonObject
     attr_reader :json_parent
 
     def initialize hash, parent=nil
-      self.json_object_hash = hash
+      self.json_hash = hash
       @json_parent = parent
     end
   end

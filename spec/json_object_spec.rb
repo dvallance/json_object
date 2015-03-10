@@ -21,7 +21,7 @@ describe JsonObject do
   describe Base do
 
     it "creating an instance with a nil hash will create an empty hash" do
-      subject.new(nil).json_object_hash.must_be_instance_of Hash
+      subject.new(nil).json_hash.must_be_instance_of Hash
     end
   end
 
