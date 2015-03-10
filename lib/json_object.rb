@@ -4,7 +4,7 @@ require 'ostruct'
 
 module JsonObject
 
-  class CompatibleOpenStruct < OpenStruct
+  class JsonOpenStruct < OpenStruct
     attr_accessor :json_parent
 
     def initialize hash, parent=nil
@@ -20,7 +20,7 @@ module JsonObject
     end
 
     def default_json_object_class
-      @default_json_object_class || JsonObject::CompatibleOpenStruct
+      @default_json_object_class || JsonObject::JsonOpenStruct
     end
   end
 

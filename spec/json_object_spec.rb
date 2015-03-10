@@ -5,7 +5,7 @@ include JsonObject
 describe JsonObject do
 
   it "the default json_object_class is correct" do
-    JsonObject.default_json_object_class.must_equal CompatibleOpenStruct
+    JsonObject.default_json_object_class.must_equal JsonOpenStruct
   end
 
   it "we can change the default json_object_class" do
@@ -13,7 +13,7 @@ describe JsonObject do
     JsonObject.default_json_object_class = klass
     JsonObject.default_json_object_class.must_equal klass
     #reset to correct default
-    JsonObject.default_json_object_class = CompatibleOpenStruct
+    JsonObject.default_json_object_class = JsonOpenStruct
   end
 
   subject { Class.new(Base) }
@@ -143,7 +143,7 @@ describe JsonObject do
       check.instance_variable_get("@an_object_cached").must_equal nil
       check.an_object
       check.instance_variable_defined?("@an_object_cached").must_equal true
-      check.instance_variable_get("@an_object_cached").must_be_instance_of CompatibleOpenStruct
+      check.instance_variable_get("@an_object_cached").must_be_instance_of JsonOpenStruct
     end
 
     describe "providing a class to handle a json object" do
@@ -175,7 +175,7 @@ describe JsonObject do
 
       it "assigns the values to an OpenStruct object by default" do
         subject.json_object_accessor :an_object
-        subject.new(json).an_object.must_be_instance_of CompatibleOpenStruct
+        subject.new(json).an_object.must_be_instance_of JsonOpenStruct
       end
 
       it "also has access to the parent" do
@@ -218,7 +218,7 @@ describe JsonObject do
         it "the array will contain OpenStruct objects" do
 
           subject.json_object_accessor :objects
-          subject.new(json).objects[0].must_be_instance_of CompatibleOpenStruct
+          subject.new(json).objects[0].must_be_instance_of JsonOpenStruct
 
         end
 
@@ -272,7 +272,7 @@ describe JsonObject do
         it "OpenStruct handles a nil initializer" do
           subject.json_object_accessor :objects
           subject.new(json).objects.must_be_instance_of Array
-          subject.new(json).objects.first.must_be_instance_of CompatibleOpenStruct
+          subject.new(json).objects.first.must_be_instance_of JsonOpenStruct
         end
       end
 
