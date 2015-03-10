@@ -29,7 +29,7 @@ describe JsonObject do
 
     let(:json) do
       JSON.parse(<<-EOS
-        {"an_integer":1,"a_string":"my string","a_boolean":true,"an_array":[1,2,3]}
+        {"an_integer":1,"a_string":"my string","a_boolean":true,"an_array":[1,2,3],"false_boolean":false}
       EOS
       )
     end
@@ -90,6 +90,16 @@ describe JsonObject do
       it "we can provide a default value so a nil return can be avoided" do
         subject.json_value_accessor :not_there, default: "my default value"
         subject.init_from_json_hash(json).not_there.must_equal "my default value"
+      end
+
+      it "we can provide a default value that would evaluate to false" do
+        subject.json_value_accessor :not_there, default: false
+        subject.init_from_json_hash(json).not_there.must_equal false
+      end
+
+      it "a default value will not overwrite an existing value that evaluates to false" do
+        subject.json_value_accessor :false_boolean, default: true
+        subject.init_from_json_hash(json).false_boolean.must_equal false
       end
 
       it "we can provide a modifier proc" do

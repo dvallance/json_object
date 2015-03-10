@@ -56,10 +56,11 @@ module JsonObject
     private :create_value_accessor_method
 
     def json_value_accessor attribute, opts={}
-      default_value = opts[:default] || nil
-      proc_provided = opts[:proc] || nil
+      default_value = opts[:default]
+      proc_provided = opts[:proc]
       create_value_accessor_method attribute, opts do |obj|
-        value = obj.json_hash[attribute.to_s] || default_value
+        value = obj.json_hash[attribute.to_s]
+        value = default_value if value.nil?
         proc_provided ? proc_provided.call(obj, value) : value
       end
     end
