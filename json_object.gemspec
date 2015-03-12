@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = JsonObject::VERSION
   spec.authors       = ["Dave Vallance"]
   spec.email         = ["davevallance@gmail.com"]
-  spec.summary       = %q{Assign custom accessors for a json hash.}
-  spec.description   = %q{A json hash is stored internally and you define how you wish to access the values. You can control the accessor names, default values and provide procs to do more complex computation}
+  spec.summary       = %q{Create custom classes to handle json. Definable accessor names, default values, etc.}
+  spec.description   = %q{Given a json hash your classes can give a lot of control on how to access the values. You can control the accessor method names, default values and provide procs to do more complex computation.}
   spec.homepage      = ""
   spec.license       = "MIT"
 
