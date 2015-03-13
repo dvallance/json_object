@@ -19,11 +19,11 @@ require 'ostruct'
 #       # does something with string
 #     end
 #
-#     # we must override the default {#init_from_json_hash} method as it will call
+#     # we must override the default {#create} method as it will call
 #     # new() with no arguments on the class by default
 #
 #     #this is the form it must take
-#     def self.init_from_json_hash hash, parent=nil
+#     def self.create hash, parent=nil
 #       # here we imagine getting the initializer string param from the hash
 #       obj = new(hash["..."])
 #
@@ -38,7 +38,7 @@ require 'ostruct'
 #     end
 #
 #     # same as above but using Object#tap for a cleaner implementation
-#     def self.init_from_json_hash hash, parent=nil
+#     def self.create hash, parent=nil
 #       new(hash["..."]).tap do |obj|
 #         obj.json_hash = hash
 #         obj.json_parent = parent
@@ -48,17 +48,17 @@ require 'ostruct'
 #   end
 module JsonObject
 
-  # A sane default class for use by {ClassMethods#json_object_accessor} when a custom
+  # A sane default class for use by {ClassMethods#object_accessor} when a custom
   # class is not provided.
   #
   # Simply an OpenStruct object with our JsonObject module included.
   #
-  # @see ClassMethods#json_object_accessor
+  # @see ClassMethods#object_accessor
   class JsonOpenStruct < OpenStruct
     include JsonObject
 
     # Making sure we set our json_* attributes otherwise
-    def self.init_from_json_hash hash, parent=nil
+    def self.create hash, parent=nil
       new(hash).tap do |obj|
         obj.json_parent = parent
         obj.json_hash = hash
@@ -78,8 +78,11 @@ module JsonObject
     def default_json_object_class
       @default_json_object_class || JsonObject::JsonOpenStruct
     end
-  end
 
+    def create
+      Class.new.include(JsonObject)
+    end
+  end
 
   # Callback runs when module is included in another module/class.
   #
@@ -105,10 +108,10 @@ module JsonObject
   module ClassMethods
 
     # Provides a default implementation of this method, which is a required
-    # call, used by {#json_object_accessor}
+    # call, used by {#object_accessor}
     #
     # Usable with a class that can be initialized with no arguments e.g. new()
-    def init_from_json_hash hash, parent=nil
+    def create hash, parent=nil
       new().tap do |obj|
         obj.json_parent = parent
         obj.json_hash = hash
@@ -135,7 +138,7 @@ module JsonObject
     # @option opts [#to_s] :name Will explicitly set the new accessor method name
     # @option opts [Object] :default If {#json_hash} has no value for the given attribute the default provided will be returned.
     # @option opts [Proc] :proc Allows a supplied proc to return the value from the created accessor method. The proc has access to self and the current value; may be from the :default option if provided.
-    def json_value_accessor attribute, opts={}
+    def value_accessor attribute, opts={}
       default_value = opts[:default]
       proc_provided = opts[:proc]
       create_value_accessor_method attribute, opts do |obj|
@@ -143,46 +146,49 @@ module JsonObject
         value = default_value if value.nil?
         proc_provided ? proc_provided.call(obj, value) : value
       end
+      self
     end
 
 
     # Convienience method for defining muiltiple accessors with one call.
     # @example Muiltiple accessors with no options
-    #   json_value_accessors :first_name, :last_name, :age
+    #   value_accessors :first_name, :last_name, :age
     #
     # @example Muiltiple accessors with some options
-    #   json_value_accessors [:selected, default: false], [:category, name: :main_category], :age
+    #   value_accessors [:selected, default: false], [:category, name: :main_category], :age
     #
     # @param args [#to_s, Array<#to_s, [Hash]>]
-    def json_value_accessors *args
+    def value_accessors *args
       args.each do |values|
-        json_value_accessor *Array(values)
+        value_accessor *Array(values)
       end
+      self
     end
 
-    # Similar to json_value_accessor.
+    # Similar to value_accessor.
     #
     # @example Accepting the default object class
-    #   json_object_accessor :address_information
+    #   object_accessor :address_information
     #
     # @example Assigning a JsonObject class
-    #   json_object_accessor :address_information, class: AddressInformation
+    #   object_accessor :address_information, class: AddressInformation
     #
     # @param [#to_s] attribute will be used to retrieve the expected hash value from {#json_hash} and will be the name of the new accessor method by default.
     # @param [Hash] opts
     # @option opts [#to_s] :name Will explicitly set the new accessor method name
-    def json_object_accessor attribute, opts={}
+    def object_accessor attribute, opts={}
       klass = opts.fetch(:class, JsonObject.default_json_object_class)
       create_value_accessor_method attribute, opts do |obj|
         value_for_attribute = obj.json_hash[attribute.to_s]
         methods_value = if value_for_attribute.is_a? Array
           value_for_attribute.inject([]) do |classes, hash|
-            classes << klass.init_from_json_hash(hash, obj)
+            classes << klass.create(hash, obj)
           end
         else
-          value_for_attribute.nil? ? nil : klass.init_from_json_hash(value_for_attribute, obj)
+          value_for_attribute.nil? ? nil : klass.create(value_for_attribute, obj)
         end
       end
+      self
     end
   end
 
