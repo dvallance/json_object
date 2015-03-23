@@ -31,7 +31,7 @@ require 'ostruct'
 #       obj.json_hash = hash
 #
 #       # optionally we can set the hash_parent variable
-#       obj.json_parent = parent
+#       obj.parent = parent
 #
 #       #finnally we return our new object
 #       obj
@@ -41,7 +41,7 @@ require 'ostruct'
 #     def self.create hash, parent=nil
 #       new(hash["..."]).tap do |obj|
 #         obj.json_hash = hash
-#         obj.json_parent = parent
+#         obj.parent = parent
 #       end
 #     end
 #
@@ -60,7 +60,7 @@ module JsonObject
     # Making sure we set our json_* attributes otherwise
     def self.create hash, parent=nil
       new(hash).tap do |obj|
-        obj.json_parent = parent
+        obj.parent = parent
         obj.json_hash = hash
       end
     end
@@ -93,7 +93,7 @@ module JsonObject
   end
 
   # Used to aid in nested JsonObject's traversing back through their parents.
-  attr_accessor :json_parent
+  attr_accessor :parent
 
   # Stores the underlying JSON Hash that we wish to then declare accessors for.
   attr_accessor :json_hash
@@ -113,7 +113,7 @@ module JsonObject
     # Usable with a class that can be initialized with no arguments e.g. new()
     def create hash, parent=nil
       new().tap do |obj|
-        obj.json_parent = parent
+        obj.parent = parent
         obj.json_hash = hash
       end
     end
@@ -121,7 +121,7 @@ module JsonObject
     def create_value_accessor_method attribute, opts={}, &block
       method_name = opts[:name] || attribute
       cached_method_results_name = "@#{method_name}_cached"
-      define_method method_name  do
+      define_method method_name.to_sym  do
         return instance_variable_get(cached_method_results_name) if instance_variable_defined?(cached_method_results_name)
         instance_variable_set("@#{method_name}_cached", begin
           block.yield self
@@ -178,14 +178,15 @@ module JsonObject
     # @option opts [#to_s] :name Will explicitly set the new accessor method name
     def object_accessor attribute, opts={}
       klass = opts.fetch(:class, JsonObject.default_json_object_class)
+      set_parent = opts.fetch(:set_parent, true)
       create_value_accessor_method attribute, opts do |obj|
         value_for_attribute = obj.json_hash[attribute.to_s]
         methods_value = if value_for_attribute.is_a? Array
           value_for_attribute.inject([]) do |classes, hash|
-            classes << klass.create(hash, obj)
+            classes << klass.create(hash, set_parent ? obj : nil)
           end
         else
-          value_for_attribute.nil? ? nil : klass.create(value_for_attribute, obj)
+          value_for_attribute.nil? ? nil : klass.create(value_for_attribute, set_parent ? obj : nil)
         end
       end
       self

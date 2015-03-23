@@ -169,16 +169,29 @@ describe JsonObject do
         subject.create(json).an_object.id.must_equal 1
       end
 
+      it "the object handler sets the parent by default" do
+        TempClass = JsonObject.create
+        TempClass.object_accessor :an_object, class: object_handler_class
+        TempClass.create(json).an_object.parent.must_be_instance_of TempClass
+      end
+
+      it "the object handler handles set_parent(false)" do
+        Temp2Class = JsonObject.create
+        Temp2Class.object_accessor :an_object, class: object_handler_class, set_parent: false
+        Temp2Class.create(json).an_object.parent.must_be_instance_of NilClass
+      end
+
       it "the object handler has a value_accessor set that has access to the object and its parent via proc" do
         subject.value_accessor :name
-        object_handler_class.value_accessor :parents_name, proc: Proc.new {|json_object, value| json_object.json_parent.name}
+        object_handler_class.value_accessor :parents_name, proc: Proc.new {|json_object, value| json_object.parent.name}
         subject.object_accessor :an_object, class: object_handler_class
         subject.create(json).an_object.parents_name.must_equal "record one"
 
         #also confirm the parent is correct
         result = subject.create(json)
-        result.an_object.json_parent.must_equal result
+        result.an_object.parent.must_equal result
       end
+
     end
 
     describe "not supplying a specific object handler" do
@@ -191,7 +204,7 @@ describe JsonObject do
       it "also has access to the parent" do
         subject.object_accessor :an_object
         result = subject.create(json)
-        result.an_object.json_parent.must_equal result
+        result.an_object.parent.must_equal result
       end
     end
 
@@ -259,6 +272,18 @@ describe JsonObject do
           subject.object_accessor :objects, name: 'cool_objects', class: object_handler_class
           subject.create(json).methods.must_include :cool_objects
           subject.create(json).cool_objects.first.id.must_equal 1
+        end
+
+        it "the object handler sets the parent by default" do
+          Temp3Class = JsonObject.create
+          Temp3Class.object_accessor :objects, class: object_handler_class
+          Temp3Class.create(json).objects.first.parent.must_be_instance_of Temp3Class
+        end
+
+        it "the object handler handles set_parent(false)" do
+          Temp4Class = JsonObject.create
+          Temp4Class.object_accessor :objects, class: object_handler_class, set_parent: false
+          Temp4Class.create(json).objects.first.parent.must_be_instance_of NilClass
         end
 
       end
