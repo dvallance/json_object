@@ -12,9 +12,13 @@ I've used Ruby 2.0 keyword arguments. If theres a big demand for pre Ruby 2 supp
 
 Add this line to your application's Gemfile:
 
+*The gem is pluralized to avoid a naming conflict with an existing gem, but the require is singular*
+
 ```ruby
-gem 'json_object'
+gem 'json_objects', :require => "json_object"
 ```
+
+
 
 And then execute:
 
