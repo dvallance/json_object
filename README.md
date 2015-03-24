@@ -1,6 +1,8 @@
 # JsonObject
 
-TODO: Write a gem description
+## Description
+
+See http://www.wisethinker.info/json-object/index for a quick description and more detailed information.
 
 ## Installation
 
@@ -17,10 +19,6 @@ And then execute:
 Or install it yourself as:
 
     $ gem install json_object
-
-## Usage
-
-TODO: Write usage instructions here
 
 ## Contributing
 
