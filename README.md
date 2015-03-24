@@ -8,6 +8,10 @@ See http://www.wisethinker.info/json-object/index for a quick description and mo
 
 Add this line to your application's Gemfile:
 
+## Ruby 2.0 dependent
+
+I've used Ruby 2.0 keyword arguments. If theres a big demand for pre Ruby 2 support let me know ;)
+
 ```ruby
 gem 'json_object'
 ```
